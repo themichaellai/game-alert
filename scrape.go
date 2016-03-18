@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -15,7 +14,7 @@ type Team struct {
 	Names Name
 }
 
-type Game struct {
+type GameResponse struct {
 	Home              Team
 	Away              Team
 	FinalMessage      string
@@ -23,40 +22,43 @@ type Game struct {
 }
 
 type Response struct {
-	Games []Game
+	Games []*GameResponse
 }
 
-func parseBracket(response []byte) Response {
+func parseBracket(response []byte) *Response {
 	res := Response{}
 
 	if err := json.Unmarshal(response, &res); err != nil {
 		panic(err)
 	}
-	return res
+	return &res
 }
 
-func getUrl(url string) []byte {
+func getUrl(url string) ([]byte, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36")
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	return contents
+	return contents, nil
 }
 
-func Scrape(url string) []Game {
-	responseBody := getUrl(url)
+func Scrape(url string) ([]*GameResponse, error) {
+	responseBody, err := getUrl(url)
+	if err != nil {
+		return nil, err
+	}
 	response := parseBracket(responseBody)
-	return response.Games
+	return response.Games, nil
 }

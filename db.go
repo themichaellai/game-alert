@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"regexp"
 )
 
 type Game struct {
@@ -18,12 +20,28 @@ type Event struct {
 	Datetime   int64
 }
 
+type EventGame struct {
+	Event *Event
+	Game  *Game
+}
+
 func GameResponseToGame(gameResponse *GameResponse) *Game {
 	return &Game{
 		Home:       gameResponse.Home.Names.Short,
 		Away:       gameResponse.Away.Names.Short,
-		Status:     gameResponse.FinalMessage,
+		Status:     parseStatus(gameResponse.FinalMessage),
 		PositionId: gameResponse.BracketPositionId}
+}
+
+func parseStatus(rawStatus string) string {
+	halfRe, _ := regexp.Compile(`^(\d\w\w)( Half)?`)
+	matched := halfRe.MatchString(rawStatus)
+	if matched {
+		matches := halfRe.FindStringSubmatch(rawStatus)
+		return fmt.Sprintf("%s Half", matches[1])
+	} else {
+		return rawStatus
+	}
 }
 
 func SelectByPositionId(positionId string, db *sql.DB) (*Game, error) {
@@ -105,4 +123,35 @@ func DBHandle(dbFilename string) *sql.DB {
 		log.Fatal(err)
 	}
 	return db
+}
+
+func GetLatestEvents(db *sql.DB) ([]*EventGame, error) {
+	const limit = 50
+	rows, err := db.Query(fmt.Sprintf("select gameId, datetime, home, away, games.status, positionId from events inner join games on games.id = gameId order by datetime desc limit %d;", limit))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var eventgames = make([]*EventGame, limit)
+	i := 0
+	for rows.Next() {
+		var g Game
+		var e Event
+		err := rows.Scan(
+			&g.Id,
+			&e.Datetime,
+			&g.Home,
+			&g.Away,
+			&g.Status,
+			&g.PositionId)
+		eventgames[i] = &EventGame{
+			Game:  &g,
+			Event: &e}
+		i++
+		if err != nil {
+			return nil, err
+		}
+	}
+	return eventgames[:i], nil
 }

@@ -19,8 +19,9 @@ func createEvent(game *Game, db *sql.DB) (*Event, error) {
 	return event, nil
 }
 
-func main() {
-	db := DBHandle("./games.db")
+func runScrape(dbFilename string) {
+	log.Println("scraping...")
+	db := DBHandle(dbFilename)
 	defer db.Close()
 	gameResponses, err := Scrape("http://data.ncaa.com/carmen/brackets/championships/basketball-men/d1/2016/data.json")
 	if err != nil {
@@ -54,4 +55,15 @@ func main() {
 			}
 		}
 	}
+}
+
+func main() {
+	const dbFilename = "./games.db"
+	ticker := time.NewTicker(time.Minute)
+	go func() {
+		for _ = range ticker.C {
+			runScrape(dbFilename)
+		}
+	}()
+	ServeFeed(dbFilename)
 }

@@ -131,7 +131,7 @@ func DBHandle(dbFilename string) *sql.DB {
 
 func GetLatestEvents(db *sql.DB) ([]*EventGame, error) {
 	const limit = 50
-	rows, err := db.Query(fmt.Sprintf("select gameId, datetime, home, away, games.status, positionId, url from events inner join games on games.id = gameId order by datetime desc limit %d;", limit))
+	rows, err := db.Query(fmt.Sprintf("select gameId, datetime, home, away, events.status, positionId, url from events inner join games on games.id = gameId order by datetime desc limit %d;", limit))
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func GetLatestEvents(db *sql.DB) ([]*EventGame, error) {
 			&e.Datetime,
 			&g.Home,
 			&g.Away,
-			&g.Status,
+			&e.Status,
 			&g.PositionId,
 			&g.Url,
 		)

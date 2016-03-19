@@ -30,8 +30,8 @@ func eventToFeedElement(e *Event, g *Game) *FeedElement {
 		IsPermalink: false,
 	}
 	res := FeedElement{
-		Title:       fmt.Sprintf("%s - %s vs %s", g.Status, g.Home, g.Away),
-		Description: fmt.Sprintf("%s - %s vs %s", g.Status, g.Home, g.Away),
+		Title:       fmt.Sprintf("%s - %s vs %s", e.Status, g.Home, g.Away),
+		Description: fmt.Sprintf("%s - %s vs %s", e.Status, g.Home, g.Away),
 		Link:        fmt.Sprintf("http://www.ncaa.com%s", g.Url),
 		Guid:        guid,
 		PubDate:     time.Unix(e.Datetime, 0).Format(rfc2822),

@@ -10,8 +10,8 @@ import (
 )
 
 type Game struct {
-	Home, Away, Status, PositionId string
-	Id                             int
+	Home, Away, Status, PositionId, Url string
+	Id                                  int
 }
 
 type Event struct {
@@ -30,7 +30,9 @@ func GameResponseToGame(gameResponse *GameResponse) *Game {
 		Home:       gameResponse.Home.Names.Short,
 		Away:       gameResponse.Away.Names.Short,
 		Status:     parseStatus(gameResponse.FinalMessage),
-		PositionId: gameResponse.BracketPositionId}
+		PositionId: gameResponse.BracketPositionId,
+		Url:        gameResponse.Url,
+	}
 }
 
 func parseStatus(rawStatus string) string {
@@ -56,7 +58,9 @@ func SelectByPositionId(positionId string, db *sql.DB) (*Game, error) {
 		&game.Home,
 		&game.Away,
 		&game.Status,
-		&game.PositionId)
+		&game.PositionId,
+		&game.Url,
+	)
 	return &game, err
 }
 
@@ -68,12 +72,12 @@ func UpdateGame(game *Game, db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	stmt, err := tx.Prepare("update games set status = ?, home = ?, away = ? where id = ?")
+	stmt, err := tx.Prepare("update games set status = ?, home = ?, away = ?, url = ? where id = ?")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(game.Status, game.Home, game.Away, game.Id)
+	_, err = stmt.Exec(game.Status, game.Home, game.Away, game.Url, game.Id)
 	if err != nil {
 		return err
 	}
@@ -86,12 +90,12 @@ func InsertGame(game *Game, db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	stmt, err := tx.Prepare("insert into games(home, away, status, positionId) values(?, ?, ?, ?)")
+	stmt, err := tx.Prepare("insert into games(home, away, status, positionId, url) values(?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(game.Home, game.Away, game.Status, game.PositionId)
+	_, err = stmt.Exec(game.Home, game.Away, game.Status, game.PositionId, game.Url)
 	if err != nil {
 		return err
 	}
@@ -127,7 +131,7 @@ func DBHandle(dbFilename string) *sql.DB {
 
 func GetLatestEvents(db *sql.DB) ([]*EventGame, error) {
 	const limit = 50
-	rows, err := db.Query(fmt.Sprintf("select gameId, datetime, home, away, games.status, positionId from events inner join games on games.id = gameId order by datetime desc limit %d;", limit))
+	rows, err := db.Query(fmt.Sprintf("select gameId, datetime, home, away, games.status, positionId, url from events inner join games on games.id = gameId order by datetime desc limit %d;", limit))
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +148,9 @@ func GetLatestEvents(db *sql.DB) ([]*EventGame, error) {
 			&g.Home,
 			&g.Away,
 			&g.Status,
-			&g.PositionId)
+			&g.PositionId,
+			&g.Url,
+		)
 		eventgames[i] = &EventGame{
 			Game:  &g,
 			Event: &e}

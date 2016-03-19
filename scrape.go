@@ -19,6 +19,7 @@ type GameResponse struct {
 	Away              Team
 	FinalMessage      string
 	BracketPositionId string
+	Url               string
 }
 
 type Response struct {

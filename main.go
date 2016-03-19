@@ -33,6 +33,7 @@ func runScrape(dbFilename string) {
 		existingGame, err := SelectByPositionId(game.PositionId, db)
 		if err != nil { // game does not exist, insert
 			log.Printf("game %s does not exist\n", game.PositionId)
+			log.Println(err)
 			err = InsertGame(game, db)
 			if err != nil {
 				log.Fatal(err)
@@ -43,6 +44,7 @@ func runScrape(dbFilename string) {
 				existingGame.Status = game.Status
 				existingGame.Home = game.Home
 				existingGame.Away = game.Away
+				existingGame.Url = game.Url
 				err := UpdateGame(existingGame, db)
 				if err != nil {
 					log.Fatal(err)
@@ -61,6 +63,7 @@ func main() {
 	const dbFilename = "./games.db"
 	ticker := time.NewTicker(time.Minute)
 	go func() {
+		runScrape(dbFilename)
 		for _ = range ticker.C {
 			runScrape(dbFilename)
 		}

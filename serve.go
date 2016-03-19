@@ -32,7 +32,7 @@ func eventToFeedElement(e *Event, g *Game) *FeedElement {
 	res := FeedElement{
 		Title:       fmt.Sprintf("%s - %s vs %s", g.Status, g.Home, g.Away),
 		Description: fmt.Sprintf("%s - %s vs %s", g.Status, g.Home, g.Away),
-		Link:        "http://google.com",
+		Link:        fmt.Sprintf("http://www.ncaa.com%s", g.Url),
 		Guid:        guid,
 		PubDate:     time.Unix(e.Datetime, 0).Format(rfc2822),
 	}
@@ -43,9 +43,9 @@ func rssTemplate(inner []byte) string {
 	return fmt.Sprintf(`
 	<rss version="2.0">
 	<channel>
-	<description>bball</description>
-	<link>http://michael.pizza</link>
 	<title>ball is life</title>
+	<description>bball</description>
+	<link>http://ball.michael.pizza</link>
 	%s
 	</channel>
 	</rss>

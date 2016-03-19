@@ -13,7 +13,9 @@ type Game struct {
 }
 
 type Event struct {
-	GameId, Datetime, Id int
+	Status     string
+	GameId, Id int
+	Datetime   int64
 }
 
 func GameResponseToGame(gameResponse *GameResponse) *Game {
@@ -48,12 +50,12 @@ func UpdateGame(game *Game, db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	stmt, err := tx.Prepare("update games set status = ? where id = ?")
+	stmt, err := tx.Prepare("update games set status = ?, home = ?, away = ? where id = ?")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(game.Status, game.Id)
+	_, err = stmt.Exec(game.Status, game.Home, game.Away, game.Id)
 	if err != nil {
 		return err
 	}
@@ -84,12 +86,12 @@ func InsertEvent(event *Event, db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	stmt, err := tx.Prepare("insert into events(gameId, datetime), values(?, ?)")
+	stmt, err := tx.Prepare("insert into events(gameId, datetime, status) values(?, ?, ?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(event.GameId, event.Datetime)
+	_, err = stmt.Exec(event.GameId, event.Datetime, event.Status)
 	if err != nil {
 		return err
 	}

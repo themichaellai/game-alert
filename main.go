@@ -1,8 +1,23 @@
 package main
 
 import (
+	"database/sql"
 	"log"
+	"time"
 )
+
+func createEvent(game *Game, db *sql.DB) (*Event, error) {
+	event := &Event{
+		GameId:   game.Id,
+		Datetime: time.Now().Unix(),
+		Status:   game.Status,
+	}
+	err := InsertEvent(event, db)
+	if err != nil {
+		return nil, err
+	}
+	return event, nil
+}
 
 func main() {
 	db := DBHandle("./games.db")
@@ -25,7 +40,17 @@ func main() {
 			if existingGame.Status != game.Status {
 				log.Printf("game %d status setting to %s\n", existingGame.Id, game.Status)
 				existingGame.Status = game.Status
-				UpdateGame(existingGame, db)
+				existingGame.Home = game.Home
+				existingGame.Away = game.Away
+				err := UpdateGame(existingGame, db)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				_, err = createEvent(existingGame, db)
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		}
 	}

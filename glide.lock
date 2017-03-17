@@ -1,0 +1,14 @@
+hash: a80d65099ed473f61e38c8d183b7ac3b09cf82b4f41a190a3b0a3c98c322d4a4
+updated: 2017-03-16T21:25:30.836273874-07:00
+imports:
+- name: github.com/codegangsta/inject
+  version: 33e0aa1cb7c019ccc3fbe049a8262a6403d30504
+- name: github.com/go-martini/martini
+  version: 49411a5b646861ad29a6ddd5351717a0a9c49b94
+- name: github.com/mattn/go-sqlite3
+  version: ca5e3819723d8eeaf170ad510e7da1d6d2e94a08
+- name: golang.org/x/net
+  version: f315505cf3349909cdf013ea56690da34e96a451
+  subpackages:
+  - context
+testImports: []

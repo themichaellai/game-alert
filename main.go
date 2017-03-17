@@ -23,7 +23,7 @@ func runScrape(dbFilename string) {
 	log.Println("scraping...")
 	db := DBHandle(dbFilename)
 	defer db.Close()
-	gameResponses, err := Scrape("http://data.ncaa.com/carmen/brackets/championships/basketball-men/d1/2016/data.json")
+	gameResponses, err := Scrape("http://data.ncaa.com/carmen/brackets/championships/basketball-men/d1/2017/data.json")
 	if err != nil {
 		log.Fatal(err)
 	}

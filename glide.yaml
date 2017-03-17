@@ -1,0 +1,6 @@
+package: game-feed
+import:
+- package: github.com/go-martini/martini
+  version: ^1.0.0
+- package: github.com/mattn/go-sqlite3
+  version: ^1.2.0
